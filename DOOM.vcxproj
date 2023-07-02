@@ -150,6 +150,7 @@
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="game_core.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h" />
@@ -157,6 +158,7 @@
     <ClInclude Include="render_context.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
