@@ -147,7 +147,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="draw.cpp" />
+    <ClCompile Include="game_core.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="draw.h" />
+    <ClInclude Include="game_core.h" />
+    <ClInclude Include="render_context.h" />
+    <ClInclude Include="settings.h" />
+    <ClInclude Include="types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
