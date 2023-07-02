@@ -21,7 +21,7 @@ int main(int argc, char *args[])
         SDL_GetError());
 
     // create window
-    rc.window = SDL_CreateWindow("-", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
+    rc.window = SDL_CreateWindow("-", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WND_WIDTH, WND_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     ASSERT(rc.window, "Failed to initialize window: %s\n", SDL_GetError());
 
     // create renderer  
@@ -29,7 +29,7 @@ int main(int argc, char *args[])
     ASSERT(rc.renderer, "Failed to initialize renderer: %s\n", SDL_GetError());
 
     // Create a streaming texture
-    rc.texture = SDL_CreateTexture(rc.renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    rc.texture = SDL_CreateTexture(rc.renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WND_WIDTH, WND_HEIGHT);
     ASSERT(rc.texture, "Failed to initialize texture: %s\n", SDL_GetError());
 
     // init the game
@@ -61,7 +61,7 @@ int main(int argc, char *args[])
         g.update(deltaTime);
         g.draw();
 
-        SDL_UpdateTexture(rc.texture, NULL, rc.buff, SCREEN_WIDTH * sizeof(u32));
+        SDL_UpdateTexture(rc.texture, NULL, rc.buff, WND_WIDTH * sizeof(u32));
         SDL_RenderCopyEx(
             rc.renderer,
             rc.texture,

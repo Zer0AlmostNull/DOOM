@@ -37,7 +37,7 @@ struct RenderContext
     SDL_Renderer* renderer = NULL;
     SDL_Texture* texture = NULL;
 
-    u32 buff[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
+    u32 buff[WND_WIDTH * WND_HEIGHT] = { 0 };
 
-    Surface getSurface() { return Surface(buff, SCREEN_WIDTH, SCREEN_HEIGHT); };
+    Surface getSurface() { return Surface(buff, WND_WIDTH, WND_HEIGHT); };
 };
