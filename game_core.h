@@ -1,7 +1,8 @@
-#include"render_context.h"
+#include "render_context.h"
+#include "map.h"
 
-#include"types.h"
-#include"settings.h"
+#include "types.h"
+#include "settings.h"
 
 
 #pragma once
@@ -10,6 +11,7 @@ class Game
 {
 private:
 	RenderContext& rc;
+	Map map;
 
 public:
 

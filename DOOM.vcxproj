@@ -150,11 +150,14 @@
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="game_core.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h" />
     <ClInclude Include="game_core.h" />
+    <ClInclude Include="macros.h" />
+    <ClInclude Include="map.h" />
     <ClInclude Include="render_context.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="types.h" />

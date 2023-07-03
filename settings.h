@@ -36,3 +36,7 @@ const f32 MAX_DEPH = 20.0f;
 
 const f32 SCREEN_DIST = WND_WIDTH_HALF / tan(HALF_FOV);
 const u8 PROJECTION_SCALE = WND_WIDTH / NUM_RAYS;
+
+
+// ---------- MINIMAP ----------
+const u8 MINIMAP_SCALE = 20;
