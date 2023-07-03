@@ -3,11 +3,11 @@
 
 #include "settings.h"
 #include "types.h"
+#include "macros.h"
 
 #include "render_context.h"
 #include "game_core.h"
 
-#define ASSERT(_e, ...) if (!(_e)) { fprintf(stderr, __VA_ARGS__); exit(1); }
 
 
 RenderContext rc;
@@ -52,14 +52,18 @@ int main(int argc, char *args[])
 
         }
 
+        // ----- handle timing-----
         last = now;
         now = SDL_GetPerformanceCounter();
-
-        deltaTime = (f32)((now - last) * 1000 / (f32)SDL_GetPerformanceFrequency()) * 0.001;
+        deltaTime = (f32)((now - last) * 1000 / (f32)SDL_GetPerformanceFrequency()) * 0.001f;
         //f32 fps = 1 / deltaTime;
 
-        g.update(deltaTime);
+        // ----- handle input -----
+        const u8* keystate = SDL_GetKeyboardState(NULL);
+
+        g.update(deltaTime, keystate);
         g.draw();
+
 
         SDL_UpdateTexture(rc.texture, NULL, rc.buff, WND_WIDTH * sizeof(u32));
         SDL_RenderCopyEx(
@@ -71,6 +75,9 @@ int main(int argc, char *args[])
             NULL,
             SDL_FLIP_VERTICAL);
         SDL_RenderPresent(rc.renderer);
+
+        // reset the screen
+        std::memset(rc.buff, 0, PIXEL_COUNT * sizeof(u32));
     }
 
 
