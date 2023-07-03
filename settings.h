@@ -2,25 +2,26 @@
 #include "math.h"
 #include "vector2.h"
 
-#pragma once
-const f32 PI = 3.1415926535897f;
-const f32 TAU = 3.1415926535897f * .5f;
+#include "macros.h"
 
+#pragma once
 
 // ---------- SCREEN ---------
 
 const u16 WND_WIDTH = 800;
 const u16 WND_HEIGHT = 600;
 
+const u32 PIXEL_COUNT = WND_WIDTH * WND_HEIGHT;
+
 const u16 WND_WIDTH_HALF = WND_WIDTH / 2;
 const u16 WND_HEIGHT_HALF = WND_HEIGHT / 2;
 
 // ---------- PLAYER ---------
 
-const v2 DEFAULT_PLAYER_POS(0.0, 0.0);
+const v2 DEFAULT_PLAYER_POS(6.0, 5.0);
 const f32 DEFAULT_PLAYER_ANGLE = 0.0f;
-const f32 PLAYER_SPEED = 0.004f;
-const f32 PLATER_ROTATION_SPEED = 0.002f;
+const f32 PLAYER_SPEED = 2.0f;
+const f32 PLATER_ROTATION_SPEED = PI/1;
 
 const f32 PLAYER_RADIUS = 0.3f; // on minimap
 
