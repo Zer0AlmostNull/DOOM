@@ -1,5 +1,6 @@
 #include "render_context.h"
 #include "map.h"
+#include "player.h"
 
 #include "types.h"
 #include "settings.h"
@@ -13,8 +14,7 @@ private:
 	RenderContext& rc;
 	Map map;
 
-	v2 player_pos = v2(DEFAULT_PLAYER_POS);
-	f32 player_angle = DEFAULT_PLAYER_ANGLE;
+	Player player;
 
 public:
 

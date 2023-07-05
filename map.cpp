@@ -45,6 +45,8 @@ void Map::draw_minimap(Surface& surf)
 						wall.b.x * MINIMAP_SCALE,
 						wall.b.y * MINIMAP_SCALE,
 									wall.color);
+
+		//
 	}
 }
 
