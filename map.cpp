@@ -25,7 +25,13 @@ void Map::load_map_from_file(std::string path)
 	u32 color;
 	while (!file.eof())
 	{
+		// read from file
 		file >> x0 >> y0 >> x1 >> y1 >> std::hex >> color;
+
+		// avoid parallel lines (reduces complexity of code)
+		if (x0 == x1)
+			x1 += 0.0001f;
+
 
 		// add to the list
 		walls.push_back(Wall(x0, y0, x1, y1, color));
