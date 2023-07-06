@@ -20,8 +20,8 @@ const u16 WND_HEIGHT_HALF = WND_HEIGHT / 2;
 
 const v2 DEFAULT_PLAYER_POS(6.0, 5.0);
 const f32 DEFAULT_PLAYER_ANGLE = 0.0f;
-const f32 PLAYER_SPEED = 2.0f;
-const f32 PLATER_ROTATION_SPEED = PI/1;
+const f32 PLAYER_SPEED = 35.0f;
+const f32 PLATER_ROTATION_SPEED = PI/.80;
 
 const f32 PLAYER_RADIUS = 0.3f; // on minimap
 
@@ -40,4 +40,4 @@ const u8 PROJECTION_SCALE = WND_WIDTH / NUM_RAYS;
 
 
 // ---------- MINIMAP ----------
-const u8 MINIMAP_SCALE = 20;
+const u8 MINIMAP_SCALE = 5;
