@@ -24,8 +24,20 @@ class Application:
         self.ui_elements : list[UIElement] = []
         self.selected_vert_index = None
 
+        self.is_creating_new_wall = False
+        self.snapping = False
+
+
+        # func
+        def snapping_toggle():
+            self.snapping = not self.snapping
+
         self.ui_elements = [
-            UIButton(0, 0, 100, 20,'Create wall', background_color = (255,0,0)),
+            UIButton(0, 0, 100, 20, 'Create wall', background_color = (255, 0, 0), onclick = self.create_new_wall),
+            UIButton(110, 0, 100, 20, lambda : 'Snapping: ON' if self.snapping else 'Snapping: OFF', background_color = (255,0,0),
+                     onclick = snapping_toggle),
+            UIButton(0, 30, 100, 20, 'Save map', background_color = (255, 0, 0), onclick = self.save_data),
+
             ]
 
         self.screen: pg.Surface = screen
@@ -113,9 +125,9 @@ class Application:
         with open(path, 'w', encoding = 'utf-8') as file:
             # write each wall to file 
             for wall in self.wall_collection:
-                ax, ay = wall.a.x, wall.a.y
-                bx, by = wall.b.x, wall.b.y
-                rgba_value = (wall.color[0] << 24) | (wall.color[1] << 16) | (wall.color[2] << 8) | wall.color[3]
+                ax, ay = wall.a[0], wall.a[1]
+                bx, by = wall.b[0], wall.b[1]
+                rgba_value = (wall.color[0] << 24) | (wall.color[1] << 16) | (wall.color[2] << 8) | 255 if len(wall.color) <= 3 else wall.color[3]
 
                 file.write(f'{ax} {ay} {bx} {by} 0x{rgba_value:08X}\n')
 
@@ -160,7 +172,10 @@ class Application:
                                self.units_to_pixels(p),
                                SELECTED_POINT_R_PX+1,
                                width = 1)
-                
+    
+    def create_new_wall(self) -> None:
+        self.is_creating_new_wall = True     
+
     def get_intersected_wall_index(self) -> None | int:
         mouse_px, mouse_py = pg.mouse.get_pos()
         mouse_ux, mouse_uy = self.pixels_to_units((mouse_px, mouse_py))
@@ -295,40 +310,70 @@ class Application:
 
             # on map clicked
             if not self.is_cursor_on_ui:
-                # cleck for wall click
-                i = self.get_intersected_wall_index()            
-                
-                if i != None:
-                    # dont select same wall one again
-                    if i != self.selected_wall_index:
-                        self.select_wall(i)
-                    # select point
-                    else: 
-                        # point a
-                        a = self.wall_collection[self.selected_wall_index].a
-                        b = self.wall_collection[self.selected_wall_index].b
-                        mx, my = self.pixels_to_units(pg.mouse.get_pos())
+                # create new wall
+                if self.is_creating_new_wall:
+                    mx, my = self.pixels_to_units(pg.mouse.get_pos())
 
-                        if sqrt((a[0] - mx)**2 + (a[1]- my)**2) < SELECTED_POINT_R_UNITS:
-                            self.selected_vert_index = 0
-                        elif sqrt((b[0] - mx)**2 + (b[1]- my)**2) < SELECTED_POINT_R_UNITS:
-                            self.selected_vert_index = 1
+                    # snapping
+                    if self.snapping:
+                        mx = round(mx / GRID_CELL_UNIT_SIZE) * GRID_CELL_UNIT_SIZE
+                        my = round(my / GRID_CELL_UNIT_SIZE) * GRID_CELL_UNIT_SIZE
 
-                elif self.is_wall_selected:
-                    self.unselect_wall()
+                    # create and add wall
+                    wall = Wall((mx,my), (mx, my), WALL_DEFAULT_COLOR)
+                    self.wall_collection.append(wall)
+
+                    # select created wall
+                    self.select_wall(len(self.wall_collection) - 1)
+                    
+                    # select vert
+                    self.selected_vert_index = 1
+
+                    self.is_creating_new_wall = False
+
+                # select existing wall
+                else:
+                    # cleck for wall click
+                    i = self.get_intersected_wall_index()            
+                    
+                    if i != None:
+                        # dont select same wall one again
+                        if i != self.selected_wall_index:
+                            self.select_wall(i)
+                        # select point
+                        else: 
+                            a = self.wall_collection[self.selected_wall_index].a
+                            b = self.wall_collection[self.selected_wall_index].b
+                            mx, my = self.pixels_to_units(pg.mouse.get_pos())
+
+                            # check for collision with points
+                            if sqrt((a[0] - mx)**2 + (a[1]- my)**2) < SELECTED_POINT_R_UNITS:
+                                self.selected_vert_index = 0
+                            elif sqrt((b[0] - mx)**2 + (b[1]- my)**2) < SELECTED_POINT_R_UNITS:
+                                self.selected_vert_index = 1
+
+                    elif self.is_wall_selected:
+                        self.unselect_wall()
 
         # if is drag movement
         if self.mouse1_down and not self.is_cursor_on_ui:
             # if point selected
             if self.selected_vert_index!=None:
-                d = (self.mouse_delta_x/MAP_SCALE, -self.mouse_delta_y/MAP_SCALE)
+                mx, my = self.pixels_to_units(pg.mouse.get_pos())
+
+                d = (mx, my)
+
+                if self.snapping:
+                    d = (round(mx/GRID_CELL_UNIT_SIZE)*GRID_CELL_UNIT_SIZE, 
+                         round(my/GRID_CELL_UNIT_SIZE)*GRID_CELL_UNIT_SIZE)
+                    
+
 
                 if self.selected_vert_index == 0: 
-                    t = self.wall_collection[self.selected_wall_index].a
-                    self.wall_collection[self.selected_wall_index].a = (t[0]+d[0], t[1]+d[1])
+                    self.wall_collection[self.selected_wall_index].a = d
                 elif self.selected_vert_index == 1:
-                    t = self.wall_collection[self.selected_wall_index].b
-                    self.wall_collection[self.selected_wall_index].b = (t[0]+d[0], t[1]+d[1])
+                    self.wall_collection[self.selected_wall_index].b = d
+
                 
                 # recalculate wall params
                 self.wall_collection[self.selected_wall_index].calc_equation()
@@ -345,11 +390,18 @@ class Application:
 
     def draw_cursor_positsion(self) -> None:
         mouse_projected = self.pixels_to_units(pg.mouse.get_pos())
+
+        # draw text
         render = font_arial20.render(f'mouse: {mouse_projected}', True, (255, 255, 255))
 
         text_width, text_height = render.get_size()
         screen.blit(render, (WND_WIDTH - text_width, WND_HEIGHT - text_height))
-        pg.draw.circle(screen, (255,0,0), pg.mouse.get_pos(), CURSOR_RADIUS_PX, 1)
+
+        # draw point
+        if not self.is_creating_new_wall:
+            pg.draw.circle(screen, (255,0,0), pg.mouse.get_pos(), CURSOR_RADIUS_PX, 1)
+        else:
+            pg.draw.circle(screen, WALL_DEFAULT_COLOR, pg.mouse.get_pos(), CURSOR_RADIUS_PX)
 
     def draw_ui(self) -> None:
         # draw each one
@@ -394,4 +446,4 @@ if __name__ == "__main__":
 
         pg.display.update()
         clock.tick(60)
-        pg.display.set_caption(f"{round(clock.get_fps(),1)} FPS")
+        pg.display.set_caption(f"{round(clock.get_fps(), 1)} FPS")

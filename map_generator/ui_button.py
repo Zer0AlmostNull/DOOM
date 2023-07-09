@@ -1,14 +1,13 @@
 import pygame as pg
 from pygame import Surface
 from ui_element import *
+from typing import Callable
 
-
-    
 
 class UIButton(UIElement):
     def __init__(self, \
                  pos_x, pos_y, width, height, \
-                 text, \
+                 text: str | Callable, \
                  text_color = (255,255,255), background_color = (40,40,40), \
                  text_color_highlighted = (200,200,200), background_color_highlighted = (60,60,60), \
                  font_name = FONT_NAME,
@@ -34,11 +33,12 @@ class UIButton(UIElement):
         
         self.normal_surface = None
         self.highlighted_surface = None
-        self.normal_rect = None
-        self.highlighted_rect = None
+        self.rect = pg.Rect(self.x, self.y, self.width, self.height)
+
 
 
         self.mouse_over = False
+
 
         self._generate_surfaces()
     
@@ -46,23 +46,19 @@ class UIButton(UIElement):
     def image(self):
         return self.highlighted_surface if self.mouse_over else self.normal_surface
     
-    @property
-    def rect(self):
-        return self.highlighted_rect if self.mouse_over else self.normal_rect
-
     def _generate_surfaces(self):
-        font_size = find_font_size(self.text, self.width, self.height, self.font_name)
-        
-        self.normal_surface = render_surface_text(self.text, self.width, self.height, font_size,
-                                                   self.text_color, self.background_color, font_name= self.font_name)
-        
-        self.highlighted_surface = render_surface_text(self.text, self.width, self.height, font_size, 
-                                                   self.text_color_h, self.background_color_h, font_name= self.font_name)
+        _text = str(self.text() if callable(self.text) else self.text)
 
-        self.normal_rect = self.normal_surface.get_rect()
-        self.highlighted_rect = self.highlighted_surface.get_rect()
+        font_size = find_font_size(_text, self.width, self.height, self.font_name)
+
+        self.normal_surface = render_surface_text(_text, self.width, self.height, font_size,
+                                                   self.text_color, self.background_color, font_name = self.font_name)
+        self.highlighted_surface = render_surface_text(_text, self.width, self.height, font_size, 
+                                                   self.text_color_h, self.background_color_h, font_name = self.font_name)
 
     def update(self, events, mouse_pos):
+        # ckeck
+
         # check if mouse is over
         if self.rect.collidepoint(mouse_pos):
             self.mouse_over = True
@@ -81,7 +77,9 @@ class UIButton(UIElement):
         else:
             self.mouse_over = False
             
-        return self.mouse_over
+        # update surface if self.text is getter func
+        if callable(self.text):
+            self._generate_surfaces()
 
     def draw(self, screen: Surface, displacement = (0,0)):
         screen.blit(self.image, (self.x + displacement[0], self.y+ displacement[1]))

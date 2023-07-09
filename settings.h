@@ -18,7 +18,7 @@ const u16 WND_HEIGHT_HALF = WND_HEIGHT / 2;
 
 // ---------- PLAYER ---------
 
-const v2 DEFAULT_PLAYER_POS(6.0, 5.0);
+const v2 DEFAULT_PLAYER_POS(50.0, 30.0);
 const f32 DEFAULT_PLAYER_ANGLE = 0.0f;
 const f32 PLAYER_SPEED = 35.0f;
 const f32 PLATER_ROTATION_SPEED = PI/.80;
