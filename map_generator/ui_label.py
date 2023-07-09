@@ -7,7 +7,7 @@ class UILabel(UIElement):
     def __init__(self, \
                  pos_x, pos_y, width, height, \
                  text: Callable| str, \
-                 text_color = (255,255,255), background_color: tuple | None = (40,40,40), \
+                 text_color = (255,255,255), background_color: tuple | None = None, \
                  font_name = FONT_NAME,
                  anchor: Anchor = Anchor.CENTER):
         super().__init__()
@@ -27,22 +27,17 @@ class UILabel(UIElement):
 
         self._generate_surface()
         self.rect = self.surface.get_rect()
-        print(callable(self.text))
     
 
     def _generate_surface(self):
-        _text = self.text() if callable(self.text) else str(self.text)
+        _text = str(self.text() if callable(self.text) else self.text)
 
         font_size = find_font_size(_text, self.width, self.height, self.font_name)
-        
         self.surface = render_surface_text(_text, self.width, self.height, font_size,
                                                    self.text_color, self.background_color, font_name= self.font_name)
-        self.rect = self.surface.get_rect()
         
     def update(self, events, mouse_pos):
-        print(self.text)
         if callable(self.text):
-
             self._generate_surface()
 
         

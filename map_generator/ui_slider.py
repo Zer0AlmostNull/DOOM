@@ -9,9 +9,9 @@ class UISlider(UIElement):
                  value_setter: Callable, 
                  min_value: float = 0, max_value: float = 100, start_value: float = 0.5,
                  round_func: Callable = lambda x: round(x, 2), 
-                 bar_color: tuple = (255,255,255), handle_color: tuple = (40, 40, 40),
+                 bar_color: tuple = (255,255,255), handle_color: tuple = (0, 0, 0),
                  handle_size: int = 10,
-                 background_color: tuple | None = None, 
+                 background_color: tuple = (40,40,40), 
                  anchor: Anchor = Anchor.CENTER):
         super().__init__()
         self.x = pos_x
@@ -33,6 +33,9 @@ class UISlider(UIElement):
         self.background_color = background_color
 
         self.surface = pg.Surface((width,height), pg.SRCALPHA)
+        
+        #
+        self.apply_value()
 
         # mouse section
         self.mouse_down = False
@@ -70,6 +73,7 @@ class UISlider(UIElement):
             self.apply_value()
 
     def draw(self, screen: Surface, displacement = (0,0)) -> None:
+        # draw background
         self.surface.fill(self.background_color)
 
         # draw fill

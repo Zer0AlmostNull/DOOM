@@ -22,8 +22,7 @@ class Application:
 
         self.wall_collection: list[Wall] = []
         self.ui_elements : list[UIElement] = []
-
-        self.input_window: UIElement|None = None
+        self.selected_vert_index = None
 
         self.ui_elements = [
             UIButton(0, 0, 100, 20,'Create wall', background_color = (255,0,0)),
@@ -58,14 +57,6 @@ class Application:
         # TEST VARS
         self.test_variable = 0
     
-    @property
-    def is_input_widow_open(self) ->bool:
-        return not self.input_window == None
-
-    @property
-    def is_cursor_on_input_window(self) -> bool:
-        return self.is_input_widow_open and self.input_window.get_rect().collidepoint(pg.mouse.get_pos())
-
     @property
     def is_wall_selected(self) -> bool:
         return self.selected_wall_index != None
@@ -139,13 +130,37 @@ class Application:
     def draw_walls(self) -> None:
         # draw each wall
         for wall in self.wall_collection:
-            
-            pg.draw.line(self.screen,
+            if not self.wall_collection.index(wall) == self.selected_wall_index:
+                pg.draw.line(self.screen,
                             wall.color,
                             self.units_to_pixels(wall.a), 
                             self.units_to_pixels(wall.b), 
-                            2 if self.wall_collection.index(wall) == self.selected_wall_index else 1)
+                            1)
+            else: # draw selected wall
+                pg.draw.line(self.screen,
+                            wall.color,
+                            self.units_to_pixels(wall.a), 
+                            self.units_to_pixels(wall.b), 
+                            SELECTED_WALL_WIDTH)
+                
+                # draw enpoints
+                for point in [wall.a, wall.b]:
+                    pg.draw.circle(self.screen,
+                               wall.color,
+                               self.units_to_pixels(point),
+                               SELECTED_POINT_R_PX)
+                
+                # draw border of selected point
+                if self.selected_vert_index != None:
+                    
+                    p = [wall.a, wall.b][self.selected_vert_index]
 
+                    pg.draw.circle(self.screen,
+                               (255,255,255),
+                               self.units_to_pixels(p),
+                               SELECTED_POINT_R_PX+1,
+                               width = 1)
+                
     def get_intersected_wall_index(self) -> None | int:
         mouse_px, mouse_py = pg.mouse.get_pos()
         mouse_ux, mouse_uy = self.pixels_to_units((mouse_px, mouse_py))
@@ -153,9 +168,10 @@ class Application:
         # find wall that collides with mouse radius
         for wall in self.wall_collection:
 
+            A, B, C = wall.get_equation()
             # calculate distance from line
-            d = abs(wall.eq_A * mouse_ux + wall.eq_B * mouse_uy + wall.eq_C)\
-                    / sqrt(wall.eq_A ** 2 + wall.eq_B ** 2)
+            d = abs(A * mouse_ux + B * mouse_uy + C)\
+                    / sqrt(A ** 2 + B ** 2)
             
             # calculate distance from section center
             c_d = sqrt((mouse_ux - wall.S[0])**2 + (mouse_uy - wall.S[1])**2 )
@@ -172,27 +188,60 @@ class Application:
         if self.is_wall_selected:
             self.unselect_wall()
         self.selected_wall_index = index
+        # getters
+        def color_getter():
+            return f'color: {self.wall_collection[index].color}'
+
+        # setters
+        def r_setter(x):
+            t = self.wall_collection[index].color
+            self.wall_collection[index].color = (x, t[1], t[2])
+
+        def g_setter(x):
+            t = self.wall_collection[index].color
+            self.wall_collection[index].color = (t[0], x, t[2])
+
+        def b_setter(x):
+            t = self.wall_collection[index].color
+            self.wall_collection[index].color = (t[0], t[1], x)
 
         # create info ui
-        w, h = 100, 300
-        padding = 20
-        
-        def setter(val):
-            self.test_variable=val
-        def getter():
-            return self.test_variable
-        ui_element = UIContainer(WND_WIDTH-w-padding, padding, w,h, background_color = (60,60,60),padding=(5,10), content=[
-            UILabel(0,0,w/2, 20, f'ID: {self.selected_wall_index}',background_color = None, anchor=Anchor.CENTER),
-            UILabel(0, 0, 20, 20, getter(), anchor = Anchor.LEFT),
-            UISlider(0, 0, w-10, 20, 
-                     value_setter = setter,
+        W, H = 100, 300
+        PADDING = 20
+
+        SLIDER_H = 10
+        SLIDER_HANDLE_SIZE = 10
+
+        ui_element = UIContainer(WND_WIDTH-W-PADDING, PADDING, W,H, background_color = (60,60,60),padding=(5,10), content=[
+            UILabel(0,0,W/2, 20, f'ID: {self.selected_wall_index}',background_color = None, anchor=Anchor.CENTER),
+            UILabel(0, 0, W-10, 20, color_getter, anchor = Anchor.LEFT),
+            # r
+            UISlider(0, 0, W-10, SLIDER_H, 
+                     value_setter = r_setter,
                      min_value = 0,
-                     max_value = 100,
-                     start_value = .5,
-                     handle_size=20,
-                     background_color = (20,0,0)),
-
-
+                     max_value = 255,
+                     start_value = self.wall_collection[index].color[0]/255,
+                     handle_size = SLIDER_HANDLE_SIZE,
+                     background_color = (20,20,20),
+                     round_func= lambda x: int(x)),
+            # g
+            UISlider(0, 0, W-10, SLIDER_H, 
+                     value_setter = g_setter,
+                     min_value = 0,
+                     max_value = 255,
+                     start_value = self.wall_collection[index].color[1]/255,
+                     handle_size = SLIDER_HANDLE_SIZE,
+                     background_color = (20,20,20),
+                     round_func= lambda x: int(x)),
+            # b
+            UISlider(0, 0, W-10, SLIDER_H, 
+                     value_setter = b_setter,
+                     min_value = 0,
+                     max_value = 255,
+                     start_value = self.wall_collection[index].color[2]/255,
+                     handle_size = SLIDER_HANDLE_SIZE,
+                     background_color = (20,20,20),
+                     round_func= lambda x: int(x)),
         ])
 
         self.ui_elements.append(ui_element)
@@ -204,8 +253,7 @@ class Application:
         self.selected_wall_index = None
         self.selected_wall_ui_index = None
 
-    def exit_input_window(self) -> None: 
-        self.input_window = None
+        self.selected_vert_index: int | None = None
 
     def update(self, events):
         mouse_pos = pg.mouse.get_pos()
@@ -244,30 +292,56 @@ class Application:
 
         # handle mouse1 click
         if self.mouse1_clicked:
-            if not self.is_cursor_on_input_window and self.is_input_widow_open:
-                self.exit_input_window()
 
             # on map clicked
-            elif not self.is_cursor_on_ui and not self.is_input_widow_open:
+            if not self.is_cursor_on_ui:
                 # cleck for wall click
-                i = self.get_intersected_wall_index()
+                i = self.get_intersected_wall_index()            
+                
                 if i != None:
-                    self.select_wall(i)
+                    # dont select same wall one again
+                    if i != self.selected_wall_index:
+                        self.select_wall(i)
+                    # select point
+                    else: 
+                        # point a
+                        a = self.wall_collection[self.selected_wall_index].a
+                        b = self.wall_collection[self.selected_wall_index].b
+                        mx, my = self.pixels_to_units(pg.mouse.get_pos())
+
+                        if sqrt((a[0] - mx)**2 + (a[1]- my)**2) < SELECTED_POINT_R_UNITS:
+                            self.selected_vert_index = 0
+                        elif sqrt((b[0] - mx)**2 + (b[1]- my)**2) < SELECTED_POINT_R_UNITS:
+                            self.selected_vert_index = 1
+
                 elif self.is_wall_selected:
                     self.unselect_wall()
-       
 
         # if is drag movement
         if self.mouse1_down and not self.is_cursor_on_ui:
-            self.map_displacement = (self.mouse_delta_x + self.map_displacement[0],
+            # if point selected
+            if self.selected_vert_index!=None:
+                d = (self.mouse_delta_x/MAP_SCALE, -self.mouse_delta_y/MAP_SCALE)
+
+                if self.selected_vert_index == 0: 
+                    t = self.wall_collection[self.selected_wall_index].a
+                    self.wall_collection[self.selected_wall_index].a = (t[0]+d[0], t[1]+d[1])
+                elif self.selected_vert_index == 1:
+                    t = self.wall_collection[self.selected_wall_index].b
+                    self.wall_collection[self.selected_wall_index].b = (t[0]+d[0], t[1]+d[1])
+                
+                # recalculate wall params
+                self.wall_collection[self.selected_wall_index].calc_equation()
+            else:
+                # move map
+                self.map_displacement = (self.mouse_delta_x + self.map_displacement[0],
                                      self.map_displacement[1] - self.mouse_delta_y)
 
         # update each object
         for obj in self.ui_elements:
             obj.update(events, mouse_pos)
-
-        if self.is_input_widow_open:
-            self.input_window.update()
+        
+        #
 
     def draw_cursor_positsion(self) -> None:
         mouse_projected = self.pixels_to_units(pg.mouse.get_pos())
@@ -281,9 +355,6 @@ class Application:
         # draw each one
         for obj in self.ui_elements:
             obj.draw(self.screen)
-        
-        if self.is_input_widow_open:
-            self.input_window.draw(self.screen)
 
     def draw(self) -> None:
         # reset background
@@ -297,6 +368,7 @@ class Application:
         
 
 if __name__ == "__main__":
+
     # init pygame
     pg.init()
     screen = pg.display.set_mode((WND_WIDTH, WND_HEIGHT))

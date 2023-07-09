@@ -20,11 +20,18 @@ class Wall:
     def is_vertical(self):
         return self.a[0] == self.b[0]
     
-    def calc_equation(self):
-        '''Calculates line equation.'''
-        # if its somehow possible
+    def get_equation(self):
         if self.eq_A != None and self.eq_B != None and self.eq_C != None:
             return self.eq_A, self.eq_B, self.eq_C
+        
+        return self.calc_equation()
+
+    def calc_equation(self):
+        '''Calculates line equation.'''
+
+
+        self.length = sqrt((self.a[0] - self.b[0]) ** 2 + (self.a[1] - self.b[1])**2)
+        self.S = ((self.a[0] + self.b[0])/2, (self.a[1] + self.b[1])/2)
 
         # if its vertical
         if self.is_vertical:

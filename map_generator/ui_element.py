@@ -7,7 +7,18 @@ class Anchor(Enum):
 
 FONT_NAME = "Arial"
 
-def find_font_size(text, width, height, font_name=FONT_NAME):
+# no need to set max size of it (or I hope so)
+_fontsize_cache = {}
+def find_font_size(text, width, height, font_name: str = FONT_NAME):
+    
+    # cache section
+    cache_tag = str(len(text)) + str(width) + str(height) + font_name
+
+    if cache_tag in _fontsize_cache:
+        return _fontsize_cache[cache_tag]
+
+
+    # calculation
     font_size = 1
     font = pg.font.SysFont(font_name, font_size)
     text_width, text_height = font.size(text)
@@ -17,7 +28,12 @@ def find_font_size(text, width, height, font_name=FONT_NAME):
         font = pg.font.SysFont(font_name, font_size)
         text_width, text_height = font.size(text)
 
-    return font_size - 1
+    font_size -= 1
+
+    _fontsize_cache[cache_tag] = font_size
+    return font_size
+
+    
 
 def render_surface_text(text, width, height, \
                         font_size, text_color, background_color:tuple|None, \
