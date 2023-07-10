@@ -15,12 +15,6 @@ struct Wall
 	v2 a, b;
 	u32 color;
 	
-	// determines min and max angle of player to see the wall
-	// kind of radial size
-
-	f32 min_sight_angle = 0.0f,
-		max_sight_angle = 0.0f;
-
 	Wall(f32 _a, f32 _b, f32 _c, f32 _d, u32 _e) : a(_a, _b), b(_c, _d), color(_e) {};
 };
 
