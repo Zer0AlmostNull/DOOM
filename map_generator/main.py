@@ -37,6 +37,7 @@ class Application:
             UIButton(110, 0, 100, 20, lambda : 'Snapping: ON' if self.snapping else 'Snapping: OFF', background_color = (255,0,0),
                      onclick = snapping_toggle),
             UIButton(0, 30, 100, 20, 'Save map', background_color = (255, 0, 0), onclick = self.save_data),
+            UIButton(110, 30, 100, 20, 'Delete wall', background_color = (255, 0, 0), onclick = self.delete_wall),
 
             ]
 
@@ -382,11 +383,15 @@ class Application:
                 self.map_displacement = (self.mouse_delta_x + self.map_displacement[0],
                                      self.map_displacement[1] - self.mouse_delta_y)
 
+        # handle delete key to delete wall
+        if pg.key.get_pressed()[pg.K_DELETE]:
+            self.delete_wall()
+
+
         # update each object
         for obj in self.ui_elements:
             obj.update(events, mouse_pos)
         
-        #
 
     def draw_cursor_positsion(self) -> None:
         mouse_projected = self.pixels_to_units(pg.mouse.get_pos())
@@ -402,6 +407,15 @@ class Application:
             pg.draw.circle(screen, (255,0,0), pg.mouse.get_pos(), CURSOR_RADIUS_PX, 1)
         else:
             pg.draw.circle(screen, WALL_DEFAULT_COLOR, pg.mouse.get_pos(), CURSOR_RADIUS_PX)
+
+    def delete_wall(self) -> None:
+        if self.selected_wall_index == None:
+            return
+
+        index = self.selected_wall_index
+
+        self.unselect_wall()
+        self.wall_collection.pop(index)
 
     def draw_ui(self) -> None:
         # draw each one
