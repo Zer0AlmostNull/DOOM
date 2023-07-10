@@ -64,20 +64,22 @@ void Game::draw()
 		// get closest wall
 		Wall* closest_wall = nullptr;
 		f32 min_distance = INFINITY;
-		//f32 _x, _y;
+
+		// coords of intersectiokn points
+		f32 _x, _y;
 
 		// find the wall
 		for (Wall& wall : map.walls)
 		{	
 			// RAY in parametric: Point + Direction*T1
-			f32 r_px = player.position.x;
-			f32 r_py = player.position.y;
+			f32& r_px = player.position.x;
+			f32& r_py = player.position.y;
 			f32 r_dx = cos_a * MAX_DEPH;
 			f32 r_dy = sin_a * MAX_DEPH;
 
 			// SEGMENT in parametric: Point + Direction*T2
-			f32 s_px = wall.a.x;
-			f32 s_py = wall.a.y;
+			f32& s_px = wall.a.x;
+			f32& s_py = wall.a.y;
 			f32 s_dx = wall.b.x - wall.a.x;
 			f32 s_dy = wall.b.y - wall.a.y;
 
@@ -103,8 +105,7 @@ void Game::draw()
 			if (T2 < 0 || T2>1) continue;
 
 			// POINT OF INTERSECTION
-			//_x = r_px + r_dx * T1;
-			//_y =  r_py + r_dy * T1;
+
 			f32 dist = T1;
 
 			if (dist < min_distance)
@@ -112,6 +113,8 @@ void Game::draw()
 				closest_wall = &wall;
 				min_distance = dist;
 
+				_x = r_px + r_dx * T1;
+				_y =  r_py + r_dy * T1;
 			}
 
 		}
@@ -121,7 +124,7 @@ void Game::draw()
 		{
 
 			// DEBUG: draw colision point 
-			//draw_circle_filled(draw_surface, _x*MINIMAP_SCALE, _y * MINIMAP_SCALE, 2, closest_wall->color);
+			//draw_circle_filled(draw_surface, _x * MINIMAP_SCALE, _y * MINIMAP_SCALE, 2, closest_wall->color);
 
 			//
 			min_distance *= cosf(player.angle - ray_angle);
@@ -147,6 +150,14 @@ void Game::draw()
 
 			color = (red << 24) | (green << 16) | (blue << 8) | (color & 0xFF);
 
+			//  if distant to a or b point then make color black
+			const f32 d = 0.10f;
+			if (sqrtf((closest_wall->a.x - _x) * (closest_wall->a.x - _x) + (closest_wall->a.y - _y) * (closest_wall->a.y - _y)) < d||
+				sqrtf((closest_wall->b.x - _x) * (closest_wall->b.x - _x) + (closest_wall->b.y - _y) * (closest_wall->b.y - _y)) < d)
+			{
+				color = 0;
+			}
+
 			// draw on the screen
 			draw_rect_filled(draw_surface,
 				_ray * PROJECTION_SCALE, WND_HEIGHT_HALF + proj_height/2, PROJECTION_SCALE, proj_height, color);
@@ -160,17 +171,6 @@ void Game::draw()
 	/// drawing minimap
 	///
 	 
-	
-	for (u16 wall_id = 0; wall_id < size(map.walls); wall_id++)
-	{
-		Wall& curr_wall = map.walls[wall_id];
-
-		//draw_line(draw_surface, player.position.x * MINIMAP_SCALE, player.position.y * MINIMAP_SCALE,
-		//		curr_wall.a.x * MINIMAP_SCALE, curr_wall.a.y *MINIMAP_SCALE, curr_wall.color);
-		
-		//draw_line(draw_surface, player.position.x * MINIMAP_SCALE, player.position.y * MINIMAP_SCALE,
-		//	curr_wall.b.x * MINIMAP_SCALE, curr_wall.b.y * MINIMAP_SCALE, curr_wall.color);
-	}
 	
 	//map.draw_minimap(draw_surface);
 	//player.draw_minimap(draw_surface);
