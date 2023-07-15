@@ -1,17 +1,14 @@
 #include <SDL.h>
 #include <iostream>
 
-#include "settings.h"
-#include "types.h"
-#include "macros.h"
+#include "../include/settings.h"
+#include "../include/types.h"
+#include "../include/macros.h"
 
-#include "render_context.h"
-#include "game_core.h"
-
-
+#include "../include/render_context.h"
+#include "../include/game_core.h"
 
 RenderContext rc;
-
 
 int main(int argc, char *args[])
 {
@@ -28,12 +25,8 @@ int main(int argc, char *args[])
     rc.renderer = SDL_CreateRenderer(rc.window, -1, SDL_RENDERER_PRESENTVSYNC);
     ASSERT(rc.renderer, "Failed to initialize renderer: %s\n", SDL_GetError());
 
-    // Create a streaming texture
-    rc.texture = SDL_CreateTexture(rc.renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WND_WIDTH, WND_HEIGHT);
-    ASSERT(rc.texture, "Failed to initialize texture: %s\n", SDL_GetError());
-
     // init the game
-    Game g(rc);
+    Game game(rc);
 
     // init clock/timer
     u64 now = SDL_GetPerformanceCounter();
@@ -43,13 +36,14 @@ int main(int argc, char *args[])
 
     // event loop
     SDL_Event windowEvent;
+
+    // main game loop
     while (1)
     {
         if (SDL_PollEvent(&windowEvent))
         {
             if (windowEvent.type == SDL_QUIT)
                 break;
-
         }
 
         // ----- handle timing-----
@@ -61,31 +55,18 @@ int main(int argc, char *args[])
         // ----- handle input -----
         const u8* keystate = SDL_GetKeyboardState(NULL);
 
-        g.update(deltaTime, keystate);
-        g.draw();
+        game.update(deltaTime, keystate);
+        game.draw();
 
-
-        SDL_UpdateTexture(rc.texture, NULL, rc.buff, WND_WIDTH * sizeof(u32));
-        SDL_RenderCopyEx(
-            rc.renderer,
-            rc.texture,
-            NULL,
-            NULL,
-            0.0,
-            NULL,
-            SDL_FLIP_VERTICAL);
+        // render everything
         SDL_RenderPresent(rc.renderer);
 
-        // reset the screen
-        std::memset(rc.buff, 0, PIXEL_COUNT * sizeof(u32));
+        // reset 
+        SDL_SetRenderDrawColor(rc.renderer, 0, 0, 0, 255);
+        SDL_RenderClear(rc.renderer);
     }
-
 
     SDL_DestroyWindow(rc.window);
     SDL_Quit();
-
-
-
-
 	return 0;
 }

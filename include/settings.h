@@ -1,8 +1,8 @@
-#include "types.h"
 #include "math.h"
-#include "vector2.h"
 
-#include "macros.h"
+#include "../include/types.h"
+#include "../Vector2/Vector2.hpp"
+#include "../include/macros.h"
 
 #pragma once
 

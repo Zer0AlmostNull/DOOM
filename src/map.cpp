@@ -1,9 +1,8 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "draw.h"
-#include "map.h"
-#include "settings.h"
+#include "../include/map.h"
+#include "../include/settings.h"
 
 // loads map from file
 void Map::load_map_from_file(std::string path)
@@ -37,17 +36,20 @@ void Map::load_map_from_file(std::string path)
 
 }
 
-void Map::draw_minimap(Surface& surf)
+void Map::draw_minimap(RenderContext& ctx)
 {
 	for(const Wall & wall: walls)
 	{
-		draw_line(surf, wall.a.x * MINIMAP_SCALE,
-						wall.a.y * MINIMAP_SCALE,
-						wall.b.x * MINIMAP_SCALE,
-						wall.b.y * MINIMAP_SCALE,
-									wall.color);
+		const unsigned char red = (wall.color >> 24) & 0xFF;
+		const unsigned char green = (wall.color >> 16) & 0xFF;
+		const unsigned char blue = (wall.color >> 8) & 0xFF;
 
-		//
+		SDL_SetRenderDrawColor(ctx.renderer, red, green, blue, 255);
+
+		SDL_RenderDrawLine(ctx.renderer, wall.a.x * MINIMAP_SCALE,
+						WND_HEIGHT - wall.a.y * MINIMAP_SCALE,
+						wall.b.x * MINIMAP_SCALE,
+						WND_HEIGHT - wall.b.y * MINIMAP_SCALE);
 	}
 }
 

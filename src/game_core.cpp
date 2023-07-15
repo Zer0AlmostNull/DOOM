@@ -1,9 +1,7 @@
-
-#include "game_core.h"
-#include "draw.h"
 #include "math.h"
 
-#include "SDL2/include/SDL_events.h"
+#include "../SDL2/include/SDL_events.h"
+#include "../include/game_core.h"
 
 Game::Game(RenderContext& _rc) :rc(_rc) { }
 
@@ -52,14 +50,12 @@ void Game::update(f32 deltaTime, const u8* keystate)
 
 void Game::draw()
 {
-	Surface draw_surface = rc.getSurface();
-
 	f32 ray_angle = player.angle + HALF_FOV + 0.0001f;
 
 	for (u16 _ray = 0; _ray < NUM_RAYS; _ray++)
 	{
-		f32 sin_a = sinf(ray_angle);
-		f32 cos_a = cosf(ray_angle);
+		const f32 sin_a = sinf(ray_angle);
+		const f32 cos_a = cosf(ray_angle);
 	
 		// get closest wall
 		Wall* closest_wall = nullptr;
@@ -72,16 +68,16 @@ void Game::draw()
 		for (Wall& wall : map.walls)
 		{	
 			// RAY in parametric: Point + Direction*T1
-			f32& r_px = player.position.x;
-			f32& r_py = player.position.y;
-			f32 r_dx = cos_a * MAX_DEPH;
-			f32 r_dy = sin_a * MAX_DEPH;
+			const f32& r_px = player.position.x;
+			const f32& r_py = player.position.y;
+			const f32 r_dx = cos_a * MAX_DEPH;
+			const f32 r_dy = sin_a * MAX_DEPH;
 
 			// SEGMENT in parametric: Point + Direction*T2
-			f32& s_px = wall.a.x;
-			f32& s_py = wall.a.y;
-			f32 s_dx = wall.b.x - wall.a.x;
-			f32 s_dy = wall.b.y - wall.a.y;
+			const f32& s_px = wall.a.x;
+			const f32& s_py = wall.a.y;
+			const f32 s_dx = wall.b.x - wall.a.x;
+			const f32 s_dy = wall.b.y - wall.a.y;
 
 			// Are they parallel? If so, no intersect
 			f32 r_mag = sqrtf(r_dx * r_dx + r_dy * r_dy);
@@ -122,24 +118,24 @@ void Game::draw()
 		// if wall is not found
 		if (closest_wall != nullptr)
 		{
-
-			// DEBUG: draw colision point 
-			//draw_circle_filled(draw_surface, _x * MINIMAP_SCALE, _y * MINIMAP_SCALE, 2, closest_wall->color);
-
-			//
 			min_distance *= cosf(player.angle - ray_angle);
 
 			// calculate proper projection height
-			u16 proj_height = ((f32)SCREEN_DIST / (min_distance + 0.0001f));
-
-			// clamp values
-			if (proj_height >= WND_HEIGHT)
-				proj_height = WND_HEIGHT - 1;
+			const u16 proj_height = ((f32)SCREEN_DIST / (min_distance + 0.0001f));
 
 			// color intensity
 			f32 intensity = 1.0f / (1.0f + powf(min_distance, 4)*0.1f);
 
-			u32 color = closest_wall->color;
+			//  if distant to a or b point then make color black
+			const f32 d = 0.10f;
+			if (sqrtf((closest_wall->a.x - _x) * (closest_wall->a.x - _x) + (closest_wall->a.y - _y) * (closest_wall->a.y - _y)) < d||
+				sqrtf((closest_wall->b.x - _x) * (closest_wall->b.x - _x) + (closest_wall->b.y - _y) * (closest_wall->b.y - _y)) < d)
+			{
+				intensity = 0;
+			}
+
+
+			const u32 color = closest_wall -> color;
 			unsigned char red = (color >> 24) & 0xFF;
 			unsigned char green = (color >> 16) & 0xFF;
 			unsigned char blue = (color >> 8) & 0xFF;
@@ -148,20 +144,12 @@ void Game::draw()
 			green *= intensity;
 			blue *= intensity;
 
-			color = (red << 24) | (green << 16) | (blue << 8) | (color & 0xFF);
 
-			//  if distant to a or b point then make color black
-			const f32 d = 0.10f;
-			if (sqrtf((closest_wall->a.x - _x) * (closest_wall->a.x - _x) + (closest_wall->a.y - _y) * (closest_wall->a.y - _y)) < d||
-				sqrtf((closest_wall->b.x - _x) * (closest_wall->b.x - _x) + (closest_wall->b.y - _y) * (closest_wall->b.y - _y)) < d)
-			{
-				color = 0;
-			}
+			// draw on the 
+			SDL_Rect rect{ _ray * PROJECTION_SCALE, WND_HEIGHT_HALF - proj_height / 2, PROJECTION_SCALE, proj_height };
 
-			// draw on the screen
-			draw_rect_filled(draw_surface,
-				_ray * PROJECTION_SCALE, WND_HEIGHT_HALF + proj_height/2, PROJECTION_SCALE, proj_height, color);
-
+			SDL_SetRenderDrawColor(rc.renderer, red, green, blue, 255);
+			SDL_RenderDrawRect(rc.renderer, &rect);
 		}
 		ray_angle -= DELTA_ANGLE;
 	}
@@ -172,7 +160,7 @@ void Game::draw()
 	///
 	 
 	
-	//map.draw_minimap(draw_surface);
-	//player.draw_minimap(draw_surface);
+	map.draw_minimap(rc);
+	player.draw_minimap(rc);
 
 }

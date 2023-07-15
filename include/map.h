@@ -2,11 +2,12 @@
 #include <vector>
 #include <tuple>
 
-#include "player.h"
-#include "types.h"
-#include "vector2.h"
-#include "render_context.h"
 #include "math.h"
+
+#include "../Vector2/vector2.hpp"
+#include "../include/player.h"
+#include "../include/types.h"
+#include "../include/render_context.h"
 
 #pragma once
 
@@ -25,8 +26,5 @@ public:
 	Map(std::string path = "./map.data");
 
 	void load_map_from_file(std::string path);
-	void draw_minimap(Surface& surf);
-
-
-
+	void draw_minimap(RenderContext& ctx);
 };
